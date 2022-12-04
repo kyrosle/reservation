@@ -3,6 +3,7 @@
         "plpgsql",
         "proto",
         "protobuf",
+        "protos",
         "rtype",
         "timespan",
         "timestampz",

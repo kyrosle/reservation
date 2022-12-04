@@ -22,7 +22,7 @@ Basic architecture:
 we would use gRPC as a service interface. Below is the proto definition:
 
 ```proto
-enum ReservationType {
+enum ReservationStatus {
     UNKNOWN = 0;
     PENDING = 1;
     CONFIRMED = 2;
@@ -39,15 +39,15 @@ enum ReservationUpdateType {
 message Reservation {
     string id = 1;
     string user_id = 2;
-    ReservationType status = 3;
+    ReservationStatus status = 3;
 
     // resource reservation window
     string resource_id = 4;
     google.protobuf.Timestamp start = 5;
     google.protobuf.Timestamp end = 6;
 
-    // extra node
-    string node = 7;
+    // extra note
+    string note = 7;
 }
 
 message ReserveRequest {
@@ -59,17 +59,15 @@ message ReserveResponse {
 }
 
 message UpdateRequest {
-    ReservationStatus status = 1;
-    string node = 2;
+    string note = 2;
 }
 
 message UpdateResponse {
-    ReservationStatus status = 1;
-    string node = 2;
+    Reservation reservation = 1;
 }
 
 message ConfirmRequest {
-    string  id = 1;
+    string id = 1;
 }
 
 message ConfirmResponse {
@@ -77,7 +75,7 @@ message ConfirmResponse {
 }
 
 message CancelRequest {
-    string  id = 1;
+    string id = 1;
 }
 
 message CancelResponse {
@@ -85,7 +83,7 @@ message CancelResponse {
 }
 
 message GetRequest {
-    string  id = 1;
+    string id = 1;
 }
 
 message GetResponse {
@@ -102,16 +100,20 @@ message QueryRequest {
 }
 
 message ListenRequest {}
+message ListenResponse {
+    int8 op = 1;
+    Reservation reservation = 2;
+}
 
 service ReservationService {
-    rpc reserve(ReserveRequest) return (ReserveResponse);
-    rpc confirm(ConfirmRequest) return (ConfirmResponse);
-    rpc update(UpdateRequest) return (UpdateResponse);
-    rpc cancel(CancelRequest) return (CancelResponse);
-    rpc get(GetRequest) return (GetResponse);
-    rpc query(QueryRequest) return (stream Reservation);
-    // another system could monitor newly added/confirmed/canceled reservations
-    rpc listen(ListenRequest) return (stream Reservation);
+    rpc reserve(ReserveRequest) returns (ReserveResponse);
+    rpc confirm(ConfirmRequest) returns (ConfirmResponse);
+    rpc update(UpdateRequest) returns (UpdateResponse);
+    rpc cancel(CancelRequest) returns (CancelResponse);
+    rpc get(GetRequest) returns (GetResponse);
+    rpc query(QueryRequest) returns (stream Reservation);
+    // another system could monitor newly added/confirmed/cancelled reservations
+    rpc listen(ListenRequest) returns (stream Reservation);
 }
 ```
 
@@ -146,7 +148,7 @@ CREATE INDEX reservations_user_id_idx ON rsvp.reservations (user_id);
 -- if resource_id is null, find all reservations within during for the user
 -- if both are null, find all reservation within during
 -- if both set, find all reservation within during for the resource and user
-CREATE OR REPLACE FUNCTION rsvp.query(u_id text, rid text, during: TSTZRANGE) RETURNS TABLE rsvp.reservations AS $$ $$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION rsvp.query(uid text, rid text, during: TSTZRANGE) RETURNS TABLE rsvp.reservations AS $$ $$ LANGUAGE plpgsql;
 
 -- reservation change queue
 CREATE TABLE rsvp.reservation_changes (
@@ -171,14 +173,28 @@ BEGIN
         INSERT INTO rsvp.reservations_changes (reservation_id, op) VALUES (OLD.id, 'delete');
     END IF;
     -- notify a channel called reservation_update
-    NOTIFY reservation_update, NEW.id;
+    NOTIFY reservation_update;
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
+
 CREATE TRIGGER rsvp.reservations_trigger
     AFTER INSERT OR UPDATE OR DELETE ON rsvp.reservations
     FOR EACH ROW EXECUTE PROCEDURE rsvp.reservations_trigger();
 ```
+
+Here we use EXCLUDE constraint provided by postgres to ensure that on overlapping reservations cannot be made for a given resource at a given time.
+```sql
+CONSTRAINT reservations_conflict EXCLUDE USING gist (resource_id WITH =, timespan WITH &&)
+```
+
+![overlapping](images/overlapping.png)
+
+We also use a trigger to notify a channel when a reservation is added/updated/deleted. To make sure even we missed certain messages from the channel when DB connection is down for some reason, we use a queue to store reservation changes. Thus when we receive a notification, we can query the queue to get all the changes since last time we checked, and once we finished processing all the changes, we can delete them from the queue.
+
+### Core flow
+
+![core flow](images/arch-flow.png)
 
 Explain the proposal as if it was already included in the language and you were teaching it to another Rust programmer. That generally means:
 
@@ -193,24 +209,15 @@ For implementation-oriented RFCs (e.g. for compiler internals), this section sho
 
 ## Reference-level explanation
 
-This is the technical portion of the RFC. Explain the design in sufficient detail that:
-
-- Its interaction with other features is clear.
-- It is reasonably clear how the feature would be implemented.
-- Corner cases are dissected by example.
-
-The section should return to the examples given in the previous section, and explain more fully how the detailed proposal makes those examples work.
+TBD
 
 ## Drawbacks
 
-Why should we *not* do this?
+N/A
 
 ## Rationale and alternatives
 
-- Why is this design the best in the space of possible designs?
-- What other designs have been considered and what is the rationale for not choosing them?
-- What is the impact of not doing this?
-- If this is a language proposal, could this be done in a library or macro instead? Does the proposed change make Rust code easier or harder to read, understand, and maintain?
+N/A
 
 ## Prior art
 
@@ -230,26 +237,11 @@ Please also take into consideration that rust sometimes intentionally diverges f
 
 ## Unresolved questions
 
-- What parts of the design do you expect to resolve through the RFC process before this gets merged?
-- What parts of the design do you expect to resolve through the implementation of this feature before stabilization?
-- What related issues do you consider out of scope for this RFC that could be addressed in the future independently of the solution that comes out of this RFC?
+- how to handle repeated reservation? - is this more ore less a business logic which shouldn't be put into this layer? (non-goal: we consider this is a business logic and should be handled by the caller)
+- if load is big, we may use an external queue for recording changes.
+- we haven't considered observability/deployment yet.
+- query performance might be an issue - need to revisit the index and also consider using cache.
 
 ## Future possibilities
 
-Think about what the natural extension and evolution of your proposal would
-be and how it would affect the language and project as a whole in a holistic
-way. Try to use this section as a tool to more fully consider all possible
-interactions with the project and language in your proposal.
-Also consider how this all fits into the roadmap for the project
-and of the relevant sub-team.
-
-This is also a good place to "dump ideas", if they are out of scope for the
-RFC you are writing but otherwise related.
-
-If you have tried and cannot think of any future possibilities,
-you may simply state that you cannot think of anything.
-
-Note that having something written down in the future-possibilities section
-is not a reason to accept the current or a future RFC; such notes should be
-in the section on motivation or rationale in this or subsequent RFCs.
-The section merely provides additional information.
+TBD
