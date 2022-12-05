@@ -5,6 +5,7 @@
         "protobuf",
         "protos",
         "rtype",
+        "thiserror",
         "timespan",
         "timestampz",
         "tstzrange",
