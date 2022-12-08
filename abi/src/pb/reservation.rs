@@ -21,9 +21,9 @@ pub struct Reservation {
     /// end time of the reservation
     #[prost(message, optional, tag = "6")]
     pub end: ::core::option::Option<::prost_types::Timestamp>,
-    /// extra node
+    /// extra note
     #[prost(string, tag = "7")]
-    pub node: ::prost::alloc::string::String,
+    pub note: ::prost::alloc::string::String,
 }
 /// To make a reservation, send a ReserveRequest with Reservation object (id
 /// should be empty)
@@ -42,7 +42,7 @@ pub struct ReserveResponse {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct UpdateRequest {
     #[prost(string, tag = "2")]
-    pub node: ::prost::alloc::string::String,
+    pub note: ::prost::alloc::string::String,
 }
 /// Update reservation will be returned in UpdateREsponse
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -125,6 +125,7 @@ pub struct ListenResponse {
     pub reservation: ::core::option::Option<Reservation>,
 }
 /// reservation status for a given time period
+#[derive(sqlx::Type)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
 #[repr(i32)]
 pub enum ReservationStatus {

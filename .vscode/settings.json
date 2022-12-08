@@ -1,14 +1,25 @@
 {
     "cSpell.words": [
+        "chrono",
+        "datetime",
+        "kyros",
+        "nanos",
         "plpgsql",
+        "prost",
         "proto",
         "protobuf",
         "protos",
         "rtype",
+        "splitn",
+        "sqlx",
+        "subsec",
         "thiserror",
         "timespan",
         "timestampz",
         "tstzrange",
         "varchar"
-    ]
+    ],
+    "lldb.showDisassembly": "auto",
+    "lldb.dereferencePointers": true,
+    "lldb.consoleMode": "commands"
 }
