@@ -3,19 +3,19 @@ use std::{collections::HashMap, convert::Infallible, str::FromStr};
 use chrono::{DateTime, Utc};
 use regex::Regex;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ReservationConflictInfo {
     Parsed(ReservationConflict),
     UnParsed(String),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReservationConflict {
     pub new: ReservationWindow,
     pub old: ReservationWindow,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReservationWindow {
     pub rid: String,
     pub start: DateTime<Utc>,
@@ -58,7 +58,7 @@ impl TryFrom<HashMap<String, String>> for ReservationWindow {
 
     // "Key (resource_id, timespan)=(ocean-view-room-713, [\"2022-12-26 22:00:00+00\",\"2022-12-30 19:00:00+00\")) conflicts with existing key (resource_id, timespan)=(ocean-view-room-713, [\"2022-12-25 22:00:00+00\",\"2022-12-28 19:00:00+00\"))."
     fn try_from(value: HashMap<String, String>) -> Result<Self, Self::Error> {
-        let timespan_str = value.get("timespan").ok_or(())?.replace('"', "");
+        let timespan_str = value.get("timespan").ok_or(())?.replace(['"', '\\'], "");
         let mut split = timespan_str.splitn(2, ',');
 
         let start = parse_datetime(split.next().ok_or(())?)?;
@@ -88,10 +88,11 @@ impl FromStr for ParseInfo {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // use regular expression to parse the string
         let re = Regex::new(
-            r#"\((?P<k1>[a-zA-Z0-9_-]+)\s*,\s*(?P<k2>[a-zA-Z0-9_-]+)\)=\((?P<v1>[a-zA-Z0-9_-]+)\s*,\s*\[(?P<v2>[^\)\]]+)\)"#,
+            r#"\((?P<k1>[a-zA-Z0-9_-]+)\s*,\s*(?P<k2>[a-zA-Z0-9_-]+)\)=\((?P<v1>[a-zA-Z0-9_-]+)\s*,\s*\[(?P<v2>[^\)\]]+)"#,
         ).unwrap();
         let mut maps = vec![];
-        for cap in re.captures_iter(s) {
+        let iter = re.captures_iter(s);
+        for cap in iter {
             let mut map = HashMap::new();
             map.insert(cap["k1"].to_string(), cap["v1"].to_string());
             map.insert(cap["k2"].to_string(), cap["v2"].to_string());

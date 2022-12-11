@@ -9,6 +9,7 @@
         "proto",
         "protobuf",
         "protos",
+        "rsvps",
         "rtype",
         "splitn",
         "sqlx",

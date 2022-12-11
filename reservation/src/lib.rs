@@ -1,11 +1,8 @@
 mod manager;
 
+use abi::ReservationId;
 use async_trait::async_trait;
 use sqlx::PgPool;
-
-pub type ReservationId = String;
-pub type UserId = String;
-pub type ResourceId = String;
 
 #[derive(Debug)]
 pub struct ReservationManager {
@@ -25,7 +22,7 @@ pub trait Rsvp {
         note: String,
     ) -> Result<abi::Reservation, abi::Error>;
     /// delete reservation
-    async fn delete(&self, id: ReservationId) -> Result<abi::Reservation, abi::Error>;
+    async fn delete(&self, id: ReservationId) -> Result<(), abi::Error>;
     /// get reservation by id
     async fn get(&self, id: ReservationId) -> Result<abi::Reservation, abi::Error>;
     /// query reservations
@@ -33,4 +30,9 @@ pub trait Rsvp {
         &self,
         query: abi::ReservationQuery,
     ) -> Result<Vec<abi::Reservation>, abi::Error>;
+    /// query reservation order by reservation id
+    async fn filter(
+        &self,
+        filter: abi::ReservationFilter,
+    ) -> Result<(abi::FilterPager, Vec<abi::Reservation>), abi::Error>;
 }
