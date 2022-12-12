@@ -87,7 +87,7 @@ mod tests {
         };
         let range = get_timespan(Some(&start), Some(&end));
 
-        assert_eq!(range.start, Bound::Included(convert_to_utc_time(start)));
-        assert_eq!(range.end, Bound::Included(convert_to_utc_time(end)));
+        assert_eq!(range.start, Bound::Included(convert_to_utc_time(&start)));
+        assert_eq!(range.end, Bound::Included(convert_to_utc_time(&end)));
     }
 }

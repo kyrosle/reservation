@@ -1,0 +1,22 @@
+# pub struct DbConfig {
+#     pub host: String,
+#     pub port: u16,
+#     pub user: String,
+#     pub password: String,
+#     pub dbname: String,
+# }
+# DATABASE_URL = "postgres://postgres:1234@192.168.30.226:55433/reservation"
+# pub struct ServerConfig {
+#     pub host: String,
+#     pub port: u16,
+# }
+---
+db: 
+  host: 192.168.30.226,
+  port: 55433
+  user: postgres
+  password: 1234
+  dbname: reservation
+service:
+  host: localhost
+  port: 50001

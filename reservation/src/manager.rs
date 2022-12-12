@@ -1,4 +1,3 @@
-use abi::FilterPager;
 use abi::Validator;
 use async_trait::async_trait;
 use sqlx::{PgPool, Row};

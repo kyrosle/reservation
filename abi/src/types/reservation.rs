@@ -23,8 +23,8 @@ impl Reservation {
             user_id: uid.into(),
             status: ReservationStatus::Pending as i32,
             resource_id: rid.into(),
-            start: Some(convert_to_timestamp(start.with_timezone(&Utc))),
-            end: Some(convert_to_timestamp(end.with_timezone(&Utc))),
+            start: Some(convert_to_timestamp(&start.with_timezone(&Utc))),
+            end: Some(convert_to_timestamp(&end.with_timezone(&Utc))),
             note: note.into(),
         }
     }
@@ -65,8 +65,8 @@ impl FromRow<'_, PgRow> for Reservation {
             user_id: row.get("user_id"),
             resource_id: row.get("resource_id"),
             status: ReservationStatus::from(status) as i32,
-            start: Some(convert_to_timestamp(start)),
-            end: Some(convert_to_timestamp(end)),
+            start: Some(convert_to_timestamp(&start)),
+            end: Some(convert_to_timestamp(&end)),
             note: row.get("note"),
         })
     }

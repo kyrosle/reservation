@@ -24,8 +24,8 @@ pub fn validate_range(start: Option<&Timestamp>, end: Option<&Timestamp>) -> Res
     Ok(())
 }
 pub fn get_timespan(start: Option<&Timestamp>, end: Option<&Timestamp>) -> PgRange<DateTime<Utc>> {
-    let start = convert_to_utc_time(start.unwrap().clone());
-    let end = convert_to_utc_time(end.unwrap().clone());
+    let start = convert_to_utc_time(start.unwrap());
+    let end = convert_to_utc_time(end.unwrap());
     PgRange {
         start: Bound::Included(start),
         end: Bound::Included(end),
