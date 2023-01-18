@@ -10,7 +10,10 @@ dependencies = [
  "derive_builder",
  "prost",
  "prost-types",
+ "proto-builder-trait",
  "regex",
+ "serde",
+ "serde_yaml",
  "sqlx",
  "thiserror",
  "tonic",
@@ -1160,6 +1163,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "proto-builder-trait"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b11a7a15961d0400c196960a09068a854f03cdd3d33e7c6d8957300df4270d16"
+dependencies = [
+ "prost-build",
+ "tonic-build",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1252,23 +1265,31 @@ dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
+ "futures",
  "prost-types",
  "sqlx",
  "sqlx-database-tester",
  "thiserror",
  "tokio",
+ "tracing",
 ]
 
 [[package]]
 name = "reservation-service"
 version = "0.1.0"
 dependencies = [
+ "abi",
  "anyhow",
  "futures",
+ "once_cell",
+ "rand",
  "reservation",
  "serde",
- "serde_yaml",
+ "shellexpand",
+ "sqlx",
+ "sqlx-db-tester",
  "tokio",
+ "tokio-stream",
  "tonic",
 ]
 
@@ -1409,6 +1430,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "shellexpand"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd1c7ddea665294d484c39fd0c0d2b7e35bbfe10035c5fe1854741a57f6880e1"
+dependencies = [
+ "dirs",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1546,6 +1576,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "sqlx-db-tester"
+version = "0.1.0"
+dependencies = [
+ "sqlx",
+ "tokio",
+ "uuid",
 ]
 
 [[package]]

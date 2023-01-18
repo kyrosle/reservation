@@ -10,10 +10,18 @@ chrono = { version = "0.4.23", features = ["serde"] }
 prost = "0.11.3"
 prost-types = "0.11.2"
 tonic = { version = "0.8.3", features = ["gzip"] }
-sqlx = { version = "0.6.2", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
+sqlx = { version = "0.6.2", features = [
+    "runtime-tokio-rustls",
+    "postgres",
+    "chrono",
+    "uuid",
+] }
 thiserror = "1.0.37"
 regex = "1.7.0"
 derive_builder = "0.12.0"
+serde = { version = "1.0.150", features = ["derive"] }
+serde_yaml = "0.9.14"
 
 [build-dependencies]
+proto-builder-trait = "0.2.0"
 tonic-build = "0.8.4"

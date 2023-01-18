@@ -49,25 +49,28 @@ message ReserveRequest { Reservation reservation = 1; }
 message ReserveResponse { Reservation reservation = 1; }
 
 // To make a reservation, send an UpdateRequest. Only note is updateable
-message UpdateRequest { string note = 2; }
+message UpdateRequest {
+  int64 id = 1;
+  string note = 2;
+}
 
 // Update reservation will be returned in UpdateREsponse
 message UpdateResponse { Reservation Reservation = 1; }
 
 // To Change a reservation from pending to confirmed, send a ConfirmRequest
-message ConfirmRequest { string id = 1; }
+message ConfirmRequest { int64 id = 1; }
 
 // Confirmed reservation will be returned in ConfirmResponse
 message ConfirmResponse { Reservation reservation = 1; }
 
 // To cancel a reservation, send a CancelRequest
-message CancelRequest { string id = 1; }
+message CancelRequest { int64 id = 1; }
 
 // Canceled reservation will be returned in CancelResponse
 message CancelResponse { Reservation reservation = 1; }
 
 // To get a reservation, send a GetRequest
-message GetRequest { string id = 1; }
+message GetRequest { int64 id = 1; }
 
 // Reservation will be returned in GetResponse
 message GetResponse { Reservation reservation = 1; }
@@ -85,12 +88,8 @@ message ReservationQuery {
   google.protobuf.Timestamp start = 4;
   // end time for the reservation query, if 0, use Infinity for end time
   google.protobuf.Timestamp end = 5;
-  // current page for query
-  int32 page = 6;
-  // page size for the query
-  int32 page_size = 7;
   // sort direction
-  bool desc = 8;
+  bool desc = 6;
 }
 
 // To query a reservation, send a QueryRequest
@@ -104,9 +103,9 @@ message ReservationFilter {
   string user_id = 2;
   // use status to filter result. If UNKNOWN, return all reservations
   ReservationStatus status = 3;
-  int64 cursor = 4;
+  optional int64 cursor = 4;
   // page size for the query
-  int32 page_size = 5;
+  int64 page_size = 5;
   // sort direction
   bool desc = 6;
 }
@@ -116,9 +115,9 @@ message FilterRequest { ReservationFilter filter = 1; }
 
 // filter pager info
 message FilterPager {
-  int64 prev = 1;
-  int64 next = 2;
-  int32 total = 3;
+  optional int64 prev = 1;
+  optional int64 next = 2;
+  optional int64 total = 3;
 }
 
 message FilterResponse {

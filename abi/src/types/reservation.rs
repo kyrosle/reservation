@@ -11,7 +11,7 @@ use crate::{convert_to_timestamp, Error, Reservation, ReservationStatus, RsvpSta
 use super::{get_timespan, validate_range};
 
 impl Reservation {
-    pub fn new(
+    pub fn new_pending(
         uid: impl Into<String>,
         rid: impl Into<String>,
         start: DateTime<FixedOffset>,

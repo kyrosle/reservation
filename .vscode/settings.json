@@ -2,6 +2,7 @@
     "cSpell.words": [
         "chrono",
         "datetime",
+        "datname",
         "dbname",
         "kyros",
         "nanos",
@@ -12,6 +13,7 @@
         "protos",
         "rsvps",
         "rtype",
+        "shellexpand",
         "splitn",
         "sqlx",
         "subsec",
